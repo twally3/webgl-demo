@@ -1,21 +1,76 @@
 const { mat4 } = window.glMatrix;
 
 const canvas = document.getElementById('canvas');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
 const gl = canvas.getContext('webgl');
 
 if (!gl) throw new Error('WebGL is not supported!');
 
+
 const vertexData = [
-	0, 1, 0,
-	1, -1, 0,
-	-1, -1, 0
+	//  Clockwise wind - FLBRTB
+	// Front 
+	0.5, 0.5, 0.5,
+	0.5, -0.5, 0.5,
+	-0.5, 0.5, 0.5,
+	-0.5, 0.5, 0.5,
+	0.5, -0.5, 0.5,
+	-0.5, -0.5, 0.5,
+
+	// Left
+	-0.5, 0.5, 0.5,
+	-0.5, -0.5, 0.5,
+	-0.5, 0.5, -0.5,
+	-0.5, 0.5, -0.5,
+	-0.5, -0.5, 0.5,
+	-0.5, -0.5, -0.5,
+
+	//Back
+	-0.5, 0.5, -0.5,
+	-0.5, -0.5, -0.5,
+	0.5, 0.5, -0.5,
+	0.5, 0.5, -0.5,
+	-0.5, -0.5, -0.5,
+	0.5, -0.5, -0.5,
+
+	// Right
+	0.5, 0.5, -0.5,
+	0.5, -0.5, -0.5,
+	0.5, 0.5, 0.5, 
+	0.5, 0.5, 0.5, 
+	0.5, -0.5, -0.5,
+	0.5, -0.5, 0.5,
+
+	// Top
+	0.5, 0.5, 0.5, 
+	0.5, 0.5, -0.5,
+	-0.5, 0.5, 0.5,
+	-0.5, 0.5, 0.5,
+	0.5, 0.5, -0.5,
+	-0.5, 0.5, -0.5,
+
+	// Bottom
+	0.5, -0.5, 0.5,
+	0.5, -0.5, -0.5,
+	-0.5, -0.5, 0.5,
+	-0.5, -0.5, 0.5,
+	0.5, -0.5, -0.5,
+	-0.5, -0.5, -0.5
 ];
 
-const colorData = [
-	1, 0, 0,
-	0, 1, 0,
-	0, 0, 1
-];
+function randomColor() {
+	return [Math.random(), Math.random(), Math.random()];
+}
+
+let colorData = [];
+for (let face = 0; face < vertexData.length / 3; face++) {
+	let faceColor = randomColor();
+	for (let vertex = 0; vertex < 6; vertex++) {
+		colorData.push(...faceColor);
+	}
+}
 
 const positionBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -70,6 +125,7 @@ gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
 gl.vertexAttribPointer(colorLocation, 3, gl.FLOAT, false, 0, 0);
 
 gl.useProgram(program);
+gl.enable(gl.DEPTH_TEST);
 
 const uniformLocations = {
 	matrix: gl.getUniformLocation(program, `matrix`)
@@ -81,9 +137,11 @@ mat4.scale(matrix, matrix, [0.25, 0.25, 0.25]);
 
 function animate() {
 	requestAnimationFrame(animate);
+	mat4.rotateX(matrix, matrix, Math.PI / 2 / 70);
 	mat4.rotateZ(matrix, matrix, Math.PI / 2 / 70);
+	
 	gl.uniformMatrix4fv(uniformLocations.matrix, false, matrix);
-	gl.drawArrays(gl.TRIANGLES, 0, 3);
+	gl.drawArrays(gl.TRIANGLES, 0, vertexData.length / 3);
 }
 
 animate();
