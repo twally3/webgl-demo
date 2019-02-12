@@ -1,3 +1,5 @@
+const { mat4 } = window.glMatrix;
+
 const canvas = document.getElementById('canvas');
 const gl = canvas.getContext('webgl');
 
@@ -31,9 +33,11 @@ gl.shaderSource(vertexShader, `
 	attribute vec3 color;
 	varying vec3 vColor;
 
+	uniform mat4 matrix;
+
 	void main() {
 		vColor = color;
-		gl_Position = vec4(position, 1);
+		gl_Position = matrix * vec4(position, 1);
 	}
 `);
 gl.compileShader(vertexShader);
@@ -66,4 +70,20 @@ gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
 gl.vertexAttribPointer(colorLocation, 3, gl.FLOAT, false, 0, 0);
 
 gl.useProgram(program);
-gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+const uniformLocations = {
+	matrix: gl.getUniformLocation(program, `matrix`)
+};
+
+const matrix = mat4.create();
+mat4.translate(matrix, matrix, [0.2, 0.5, 0]);
+mat4.scale(matrix, matrix, [0.25, 0.25, 0.25]);
+
+function animate() {
+	requestAnimationFrame(animate);
+	mat4.rotateZ(matrix, matrix, Math.PI / 2 / 70);
+	gl.uniformMatrix4fv(uniformLocations.matrix, false, matrix);
+	gl.drawArrays(gl.TRIANGLES, 0, 3);
+}
+
+animate();
