@@ -205,9 +205,7 @@ mat4.invert(viewMatrix, viewMatrix);
 const normalMatrix = mat4.create();
 
 let lastTime = 0;
-function animate(deltaTime = 0) {
-	console.log(1000 / (deltaTime - lastTime));
-	lastTime = deltaTime;
+function animate() {
 	requestAnimationFrame(animate);
 
 	mat4.rotateX(modelMatrix, modelMatrix, Math.PI / 60);
